@@ -13,31 +13,46 @@ def connect():
 
 def deleteMatches():
     """Remove all the match records from the database."""
-    conn = connect()
-    db_cursor = conn.cursor()
+
+    """First using connect function to connect to the tournament database, 
+        and make cursor, and query the command and commint, and finally close what I connected before.
+        The command stands for delete all data from the matches table """
+
+    DB = connect()
+    c = DB.cursor()
     query1 = "DELETE from matches;"
-    db_cursor.execute(query1)
-    conn.commit()
-    conn.close()
+    c.execute(query1)
+    DB.commit()
+    DB.close()
 
 def deletePlayers():
     """Remove all the player records from the database."""
-    conn = connect()
-    db_cursor = conn.cursor()
+
+    """First using connect function to connect to the tournament database, 
+        and make cursor, and query the command and commint, and finally close what I connected before.
+        The command stands for delete all data from the players table """
+
+
+    DB = connect()
+    c = DB.cursor()
     query1 = "DELETE from players;"
-    db_cursor.execute(query1)
-    conn.commit()
-    conn.close()
+    c.execute(query1)
+    DB.commit()
+    DB.close()
 
 def countPlayers():
     """Returns the number of players currently registered."""
-    conn = connect()
-    db_cursor = conn.cursor()
+
+    """ query that display table which is the number of players currently registered.
+        and extract the value of number of players in the table and return the value """
+
+    DB = connect()
+    c = DB.cursor()
     #query1 = "select id from players order by id desc limit 1;"
     query1 = "SELECT count(*) as count from players;"
-    db_cursor.execute(query1)
+    c.execute(query1)
     count = ({'id': str(row[0])}
-                for row in db_cursor.fetchall())
+                for row in c.fetchall())
     for p in count:
         return int(p['id'])
 
@@ -51,12 +66,13 @@ def registerPlayer(name):
     Args:
       name: the player's full name (need not be unique).
     """
-    conn = connect()
-    db_cursor = conn.cursor()
+
+    DB = connect()
+    c = DB.cursor()
     query = "INSERT INTO players (name) VALUES ('%s');" % name
-    db_cursor.execute(query)
-    conn.commit()
-    conn.close()
+    c.execute(query)
+    DB.commit()
+    DB.close()
 
 
 def playerStandings():
@@ -72,6 +88,10 @@ def playerStandings():
         wins: the number of matches the player has won
         matches: the number of matches the player has played
     """
+
+    """ first, make the querry of current_standing view, which I made this view and explained in the tournament.sql.
+        and than fetchall data and return the list of tuples. """
+
     DB = connect()
     c = DB.cursor()
     query = "SELECT * from current_standing"
@@ -89,12 +109,6 @@ def reportMatch(winner, loser):
       winner:  the id number of the player who won
       loser:  the id number of the player who lost
     """
-
-    standings = playerStandings() # ex: (98, 'Princess Celestia', '0', '0')
-    players = [item[0:2] for item in standings]
-
-
-
 
     DB = connect()
     c = DB.cursor()
@@ -118,6 +132,11 @@ def swissPairings():
         id2: the second player's unique id
         name2: the second player's name
     """
+
+    """ using playerStandings function which is written before, fetch all the list of tuples from the
+        current_standings table. and just pick first two date of the tuple and package every two revised
+        tuple, and finally return the value which means the list of swisspairlist. """
+
     standings = playerStandings()
     players = [item[:2] for item in standings]
     index = 0
