@@ -7,6 +7,7 @@
 -- these lines here.
 
 -- Create players table with primary key id, and name of text type
+
 CREATE TABLE players (
 		id SERIAL primary key,
 		name TEXT
