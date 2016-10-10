@@ -5,21 +5,25 @@
 
 import psycopg2
 
-
-def connect():
-    """Connect to the PostgreSQL database.  Returns a database connection."""
-    return psycopg2.connect("dbname=tournament")
+"""Connect to the PostgreSQL database.  Returns a database connection."""
+def connect(database_name="tournament"):
+    try:
+        db = psycopg2.connect("dbname={}".format(database_name))
+        cursor=db.cursor()
+        return db, cursor
+    except:
+        print("<error message>")
 
 
 def deleteMatches():
     """Remove all the match records from the database."""
 
     """First using connect function to connect to the tournament database, 
-        and make cursor, and query the command and commint, and finally close what I connected before.
-        The command stands for delete all data from the matches table """
+        and make cursor, and query the command and commint, 
+        and finally close what I connected before. The command stands for 
+        delete all data from the matches table """
 
-    DB = connect()
-    c = DB.cursor()
+    DB, c = connect()
     query1 = "DELETE from matches;"
     c.execute(query1)
     DB.commit()
@@ -29,12 +33,12 @@ def deletePlayers():
     """Remove all the player records from the database."""
 
     """First using connect function to connect to the tournament database, 
-        and make cursor, and query the command and commint, and finally close what I connected before.
-        The command stands for delete all data from the players table """
+        and make cursor, and query the command and commint, and finally
+        close what I connected before. The command stands for delete all
+        data from the players table """
 
 
-    DB = connect()
-    c = DB.cursor()
+    DB, c = connect()
     query1 = "DELETE from players;"
     c.execute(query1)
     DB.commit()
@@ -46,15 +50,11 @@ def countPlayers():
     """ query that display table which is the number of players currently registered.
         and extract the value of number of players in the table and return the value """
 
-    DB = connect()
-    c = DB.cursor()
+    DB, c = connect()
     #query1 = "select id from players order by id desc limit 1;"
     query1 = "SELECT count(*) as count from players;"
     c.execute(query1)
-    count = ({'id': str(row[0])}
-                for row in c.fetchall())
-    for p in count:
-        return int(p['id'])
+    return int(c.fetchone()[0])
 
 
 def registerPlayer(name):
@@ -67,10 +67,10 @@ def registerPlayer(name):
       name: the player's full name (need not be unique).
     """
 
-    DB = connect()
-    c = DB.cursor()
-    query = "INSERT INTO players (name) VALUES ('%s');" % name
-    c.execute(query)
+    DB, c = connect()
+    query = "INSERT INTO players (name) VALUES (%s);"
+    parameter=(name, )
+    c.execute(query, parameter)
     DB.commit()
     DB.close()
 
@@ -89,11 +89,11 @@ def playerStandings():
         matches: the number of matches the player has played
     """
 
-    """ first, make the querry of current_standing view, which I made this view and explained in the tournament.sql.
+    """ first, make the querry of current_standing view, 
+    which I made this view and explained in the tournament.sql.
         and than fetchall data and return the list of tuples. """
 
-    DB = connect()
-    c = DB.cursor()
+    DB, c = connect()
     query = "SELECT * from current_standing"
     c.execute(query)
     DB.commit()
@@ -110,10 +110,10 @@ def reportMatch(winner, loser):
       loser:  the id number of the player who lost
     """
 
-    DB = connect()
-    c = DB.cursor()
-    query = "INSERT INTO matches (winner, loser) VALUES (%s, %s);" % (winner, loser)
-    c.execute(query)
+    DB, c = connect()
+    query = "INSERT INTO matches (winner, loser) VALUES (%s, %s);"
+    data = (winner, loser)
+    c.execute(query, data)
     DB.commit()
     DB.close()
  
@@ -133,9 +133,11 @@ def swissPairings():
         name2: the second player's name
     """
 
-    """ using playerStandings function which is written before, fetch all the list of tuples from the
-        current_standings table. and just pick first two date of the tuple and package every two revised
-        tuple, and finally return the value which means the list of swisspairlist. """
+    """ using playerStandings function which is written before, 
+        fetch all the list of tuples from the current_standings table. 
+        and just pick first two date of the tuple and package every 
+        two revised tuple, and finally return the value which means 
+        the list of swisspairlist. """
 
     standings = playerStandings()
     players = [item[:2] for item in standings]

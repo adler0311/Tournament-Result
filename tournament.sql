@@ -7,6 +7,9 @@
 -- these lines here.
 
 -- Create players table with primary key id, and name of text type
+DROP DATABASE IF EXISTS tournament;
+CREATE DATABASE tournament;
+\c tournament;
 
 CREATE TABLE players (
 		id SERIAL primary key,
